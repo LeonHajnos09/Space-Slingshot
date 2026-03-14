@@ -12,18 +12,16 @@ SPACECRAFT_MASS = 5000
 GRAVITY_CONSTANT = 6.67e-11
 
 FPS = 60
-
 PLANET_RADIUS = 50
 SPACECRAFT_RADIUS = 5
 
 VELOCITY_SCALE = 100
 DISTANCE_SCALE = 1e6
 
-BACKGROUND = pygame.image.load("stars_space_galaxy_117958_800x600.jpg")
-PLANET_IMAGE = pygame.transform.scale(pygame.image.load("tl.webp"), (PLANET_RADIUS * 2, PLANET_RADIUS * 2))
-
-WHITE = (255,255,255)
-RED = (255,0,0)
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+RED = (255, 0, 0)
+GREEN = (40, 255, 80)
 
 
 class Planet:
@@ -34,7 +32,7 @@ class Planet:
         self.mass = mass
 
     def draw(self):
-        window.blit(PLANET_IMAGE, (self.x - PLANET_RADIUS, self.y - PLANET_RADIUS))
+        pygame.draw.circle(window, GREEN, (int(self.x), int(self.y)), PLANET_RADIUS)
 
 
 class Spacecraft:
@@ -50,7 +48,6 @@ class Spacecraft:
         pygame.draw.circle(window, RED, (int(self.x), int(self.y)), SPACECRAFT_RADIUS)
 
     def update_position(self, planet):
-
         dx = planet.x - self.x
         dy = planet.y - self.y
 
@@ -61,7 +58,6 @@ class Spacecraft:
         acceleration = force / self.mass
 
         angle = math.atan2(dy, dx)
-
         acceleration_x = math.cos(angle) * acceleration
         acceleration_y = math.sin(angle) * acceleration
 
@@ -73,7 +69,6 @@ class Spacecraft:
 
 
 def create_spacecraft(start_position, mouse_position):
-
     start_x, start_y = start_position
     mouse_x, mouse_y = mouse_position
 
@@ -84,27 +79,21 @@ def create_spacecraft(start_position, mouse_position):
 
 
 def main():
-
     running = True
     clock = pygame.time.Clock()
 
     planet = Planet(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2, PLANET_MASS)
-
     spacecrafts = []
     launch_position = None
 
     while running:
-
         clock.tick(FPS)
         mouse_position = pygame.mouse.get_pos()
 
         for event in pygame.event.get():
-
             if event.type == pygame.QUIT:
                 running = False
-
             if event.type == pygame.MOUSEBUTTONDOWN:
-
                 if launch_position:
                     spacecraft = create_spacecraft(launch_position, mouse_position)
                     spacecrafts.append(spacecraft)
@@ -112,26 +101,23 @@ def main():
                 else:
                     launch_position = mouse_position
 
-        window.blit(BACKGROUND, (0,0))
+        window.fill(BLACK)
 
         if launch_position:
             pygame.draw.line(window, WHITE, launch_position, mouse_position, 2)
             pygame.draw.circle(window, RED, launch_position, SPACECRAFT_RADIUS)
 
         for spacecraft in spacecrafts[:]:
-
             spacecraft.draw()
             spacecraft.update_position(planet)
 
             off_screen = spacecraft.x < 0 or spacecraft.x > WINDOW_WIDTH or spacecraft.y < 0 or spacecraft.y > WINDOW_HEIGHT
-
             collided = math.sqrt((spacecraft.x - planet.x)**2 + (spacecraft.y - planet.y)**2) < PLANET_RADIUS
 
             if off_screen or collided:
                 spacecrafts.remove(spacecraft)
 
         planet.draw()
-
         pygame.display.update()
 
     pygame.quit()
